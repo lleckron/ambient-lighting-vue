@@ -2,7 +2,7 @@
     <button class="toggle-button" @click="toggleDivs">Swap</button>
 
     <div v-show="!videoShown" class="square" @click="switchImage()">
-        <img class="background-img" id="background-img" :src="imgSource" @load="getImageColors" alt="image" :style="shadowStyle"/>
+        <img class="background-img" id="background-img" :src="imgSource" @load="getImageColors('image')" alt="image" :style="shadowStyle"/>
     </div>
     
     <div v-show="videoShown" class="square">
@@ -25,7 +25,8 @@ export default {
 			imgArray: [banana, watermelon, wtfFruit],
             imgIndex: 0,
 			shadowStyle: String,
-            vidSource: ambient480p
+            vidSource: ambient480p,
+            recentTimeUpdate: 0
         }
     },
     methods: {
@@ -41,39 +42,50 @@ export default {
             this.imgSource = this.imgArray[this.imgIndex]
         },
 
-        getImageColors() {
+        getImageColors(imageFromType) {
             const image = document.getElementById('background-img')
+            const video = document.getElementById('background-video')
             const canvas = document.createElement('canvas')
-            canvas.width = image.getBoundingClientRect().width
-            canvas.height = image.getBoundingClientRect().height
+ 
+            let context
+            if(imageFromType === 'image') {
+                canvas.width = image.getBoundingClientRect().width
+                canvas.height = image.getBoundingClientRect().height
+                context = canvas.getContext('2d',  ({ willReadFrequently: true }))
+                context.drawImage(image, 0, 0, canvas.width, canvas.height)
+            } else if(imageFromType === 'video') {
+                canvas.width = video.getBoundingClientRect().width
+                canvas.height = video.getBoundingClientRect().height
+                context = canvas.getContext('2d',  ({ willReadFrequently: true }))
+                context.drawImage(video, 0, 0, canvas.width, canvas.height)
+            } else {
+                alert('There is a problem, refresh the page.')
+            }
 
-            const context = canvas.getContext('2d')
-            context.drawImage(image, 0, 0, canvas.width, canvas.height)
+            // get pixel data from first and last row of image
+            const dataTop = context.getImageData(0, 0, 1, canvas.width)
+            const dataBottom = context.getImageData(canvas.height - 1, 0, 1, canvas.width)
 
-            const data = context.getImageData(0, 0, canvas.height, canvas.width)
-
-			this.findRGBAverage(data.data, canvas.width)
+			this.findRGBAverage(dataTop.data, dataBottom.data)
         },
 
-		findRGBAverage(pixelData, width) {
-			const pixelRowLength = width * 4
+		findRGBAverage(pixelDataTop, pixelDataBottom) {
 			let r = 0;
 			let g = 0;
 			let b = 0;
 			let denominator =  0;
 
-			for(let i = 0; i < pixelRowLength; i += 4) {
-				r += pixelData[i]
-				g += pixelData[i + 1]
-				b += pixelData[i + 2]
+			for(let i = 0; i < pixelDataTop.length; i += 4) {
+				r += pixelDataTop[i]
+				g += pixelDataTop[i + 1]
+				b += pixelDataTop[i + 2]
 				denominator += 1
 			}
 
-			const bottomRow = pixelData.length - pixelRowLength
-			for(let i = bottomRow; i < pixelData.length; i += 4) {
-				r += pixelData[i]
-				g += pixelData[i + 1]
-				b += pixelData[i + 2]
+			for(let i = 0; i < pixelDataBottom.length; i += 4) {
+				r += pixelDataBottom[i]
+				g += pixelDataBottom[i + 1]
+				b += pixelDataBottom[i + 2]
 				denominator += 1
 			}
 
@@ -92,7 +104,23 @@ export default {
 			const shadowFive = '0 0 100px rgba(' + avgR + ', ' + avgG + ', ' + avgB + ', 1)'
 
 			this.shadowStyle = 'box-shadow: ' + shadowOne + ', ' + shadowTwo + ', ' + shadowThree + ', ' + shadowFour + ', ' + shadowFive
-		}
+		},
+
+        setupVideoEventListeners() {
+            const video = document.getElementById('background-video')
+            video.addEventListener('timeupdate', () => this.getVideoColors())
+        },
+
+        getVideoColors() {
+            const video = document.getElementById('background-video')
+            const currentTime = video.currentTime
+            if(currentTime >= (this.recentTimeUpdate + .1)) {
+                this.getImageColors('video')
+            }
+        }
+    },
+    mounted() {
+        this.setupVideoEventListeners()
     }
 }
 </script>
