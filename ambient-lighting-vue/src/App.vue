@@ -108,15 +108,7 @@ export default {
 
         setupVideoEventListeners() {
             const video = document.getElementById('background-video')
-            video.addEventListener('timeupdate', () => this.getVideoColors())
-        },
-
-        getVideoColors() {
-            const video = document.getElementById('background-video')
-            const currentTime = video.currentTime
-            if(currentTime >= (this.recentTimeUpdate + .1)) {
-                this.getImageColors('video')
-            }
+            video.addEventListener('timeupdate', () => this.getImageColors('video'))
         }
     },
     mounted() {
