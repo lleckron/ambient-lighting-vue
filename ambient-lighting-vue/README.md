@@ -1,6 +1,6 @@
 # ambient-lighting-vue
 
-This project is to create ambient lighting behind images and videos, similar to YouTube videos in dark theme.
+This project is to create ambient lighting behind images and videos, similar to the shadow behind YouTube videos in dark theme.
 
 ## Recommended IDE Setup
 
