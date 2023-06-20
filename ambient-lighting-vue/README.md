@@ -1,6 +1,6 @@
 # ambient-lighting-vue
 
-This template should help get you started developing with Vue 3 in Vite.
+This project is to create ambient lighting behind images and videos, similar to YouTube videos in dark theme.
 
 ## Recommended IDE Setup
 
