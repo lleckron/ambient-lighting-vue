@@ -6,7 +6,7 @@
     </div>
     
     <div v-show="videoShown" class="square">
-        <video class="backrgroun-video" id="background-video" :src="vidSource" :style="shadowStyle" loop controls/>
+        <video class="background-video" id="background-video" :src="vidSource" :style="shadowStyle" loop controls/>
     </div>
 </template>
 
@@ -149,6 +149,12 @@ html, body {
     height: 100%;
     width: 100%;
     background-size: cover;
+}
+
+.background-video {
+    height: 100%;
+    width: 100%;
+    transition: box-shadow .35s;
 }
 
 .toggle-button {
